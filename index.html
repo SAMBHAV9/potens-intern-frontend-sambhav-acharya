@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Operations Cockpit Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              brand: {
+                50: '#f2f7ff',
+                100: '#dcecff',
+                500: '#4f6ef7',
+                600: '#3756d6',
+                700: '#2b43a8'
+              }
+            }
+          }
+        }
+      };
+    </script>
+  </head>
+  <body class="min-h-full bg-slate-950 text-slate-100">
+    <style>
+      body.low-bandwidth .card-surface {
+        box-shadow: none !important;
+        backdrop-filter: none !important;
+        border-color: rgba(148, 163, 184, 0.35) !important;
+        background: rgba(15, 23, 42, 0.96) !important;
+      }
+
+      body.low-bandwidth .content-compact {
+        gap: 1rem;
+      }
+
+      body.low-bandwidth .metric-value {
+        font-size: 1.25rem;
+        line-height: 1.1;
+        letter-spacing: 0.02em;
+      }
+
+      body.low-bandwidth .header-shell {
+        padding: 1rem;
+        border-radius: 1rem;
+      }
+
+      body.low-bandwidth main section > div,
+      body.low-bandwidth main aside > div {
+        padding: 1rem !important;
+      }
+
+      body.low-bandwidth #actionsList article {
+        padding: 0.9rem !important;
+      }
+
+      body.low-bandwidth #bandwidthToggle {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #f59e0b !important;
+      }
+    </style>
+    <div class="mx-auto flex min-h-screen max-w-7xl flex-col px-4 py-6 sm:px-6 lg:px-8">
+      <header class="header-shell rounded-3xl border border-slate-800 bg-slate-900/80 p-6 shadow-2xl shadow-black/30 backdrop-blur card-surface">
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p id="eyebrow" class="text-sm font-semibold uppercase tracking-[0.35em] text-brand-100/80">OPS COMMAND</p>
+            <h1 id="title" class="mt-2 text-3xl font-semibold text-white sm:text-4xl">Operations Cockpit</h1>
+            <p id="subtitle" class="mt-2 max-w-2xl text-sm text-slate-300 sm:text-base">
+              A calm view of the day’s must-do work, the noise around it, and the pressure points that need attention first.
+            </p>
+          </div>
+          <div class="flex flex-wrap items-center gap-3">
+            <div class="rounded-full border border-slate-700/80 bg-slate-800/80 px-3 py-2 text-sm text-slate-300">
+              <span id="liveLabel">Live</span> · <span id="clock">09:00</span>
+            </div>
+            <button id="bandwidthToggle" class="rounded-full border border-slate-700/80 bg-slate-800/80 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-slate-700/80">
+              Low bandwidth: off
+            </button>
+            <button id="langToggle" class="rounded-full border border-brand-500/40 bg-brand-500/10 px-4 py-2 text-sm font-semibold text-brand-100 transition hover:bg-brand-500/20">
+              EN / HI
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main class="content-compact mt-6 grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+        <section class="space-y-6">
+          <div class="rounded-3xl border border-slate-800 bg-slate-900/80 p-6 shadow-xl shadow-black/20">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <h2 id="priorityTitle" class="text-xl font-semibold text-white">Top 5 actions today</h2>
+                <p id="prioritySubtitle" class="mt-1 text-sm text-slate-400">The items that need a decision before the day becomes noisy.</p>
+              </div>
+              <div class="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-sm text-emerald-300">
+                <span id="pendingCount">5</span> <span id="pendingLabel">pending</span>
+              </div>
+            </div>
+            <div id="actionsList" class="mt-5 space-y-3"></div>
+          </div>
+        </section>
+
+        <aside class="space-y-6">
+          <div class="rounded-3xl border border-slate-800 bg-slate-900/80 p-6 shadow-xl shadow-black/20">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <h2 id="metricTitle" class="text-xl font-semibold text-white">Time-sensitive metric</h2>
+                <p id="metricSubtitle" class="mt-1 text-sm text-slate-400">The review window is closing fast.</p>
+              </div>
+              <div class="rounded-full bg-brand-500/10 px-3 py-1 text-sm font-semibold text-brand-200">
+                <span id="timeMetricLabel">Live</span>
+              </div>
+            </div>
+            <div class="mt-5 rounded-2xl border border-brand-500/20 bg-brand-500/10 p-5">
+              <p id="metricValue" class="metric-value text-4xl font-semibold text-white">02:34:12</p>
+              <p id="metricContext" class="mt-2 text-sm text-brand-100/80">Until the daily review window closes.</p>
+            </div>
+          </div>
+
+          <div class="card-surface rounded-3xl border border-slate-800 bg-slate-900/80 p-6 shadow-xl shadow-black/20">
+            <div class="flex items-center justify-between gap-3">
+              <div>
+                <h2 id="anomalyTitle" class="text-xl font-semibold text-white">Automated anomalies</h2>
+                <p id="anomalySubtitle" class="mt-1 text-sm text-slate-400">Signals already flagged by the monitoring stack.</p>
+              </div>
+              <div class="rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1 text-sm text-amber-300">
+                <span id="anomalyCount">3</span>
+              </div>
+            </div>
+            <div id="anomaliesList" class="mt-5 space-y-3"></div>
+          </div>
+        </aside>
+      </main>
+    </div>
+
+    <script>
+      const translations = {
+        en: {
+          eyebrow: 'OPS TODAY',
+          title: 'Operations at a glance',
+          subtitle: 'A quick look at what needs attention first today.',
+          live: 'Live',
+          priorityTitle: 'Top 5 for today',
+          prioritySubtitle: 'These are the things that need a decision before the day gets away from you.',
+          pending: 'open',
+          metricTitle: 'Time left for review',
+          metricSubtitle: 'The window is closing soon.',
+          metricValueLabel: 'Live',
+          metricContext: 'Time left before the day wraps up.',
+          anomalyTitle: 'Alerts from the system',
+          anomalySubtitle: 'Things the system has already flagged.',
+          actionLabel: 'Action',
+          approve: 'Approve',
+          hold: 'Hold',
+          approved: 'Approved',
+          onHold: 'On hold',
+          selectedHint: 'Use J and K to move, A to approve, and H to hold.',
+          due: 'Due',
+          risk: 'Risk',
+          detail: 'Detail',
+          noAction: 'Nothing urgent right now.',
+          note: 'A good place to start the morning.'
+        },
+        hi: {
+          eyebrow: 'ऑप्स आज',
+          title: 'ऑपरेशंस का त्वरित अवलोकन',
+          subtitle: 'आज सबसे पहले जिस पर ध्यान देना है, उसका आसान नज़रिया।',
+          live: 'लाइव',
+          priorityTitle: 'आज की 5 ज़रूरी चीज़ें',
+          prioritySubtitle: 'ये वे चीज़ें हैं जिन पर दिन निकलने से पहले फैसला चाहिए।',
+          pending: 'खुला',
+          metricTitle: 'समीक्षा के लिए बचा समय',
+          metricSubtitle: 'विंडो जल्दी ही बंद हो रही है।',
+          metricValueLabel: 'लाइव',
+          metricContext: 'दिन खत्म होने से पहले बचा समय।',
+          anomalyTitle: 'सिस्टम से आने वाले अलर्ट',
+          anomalySubtitle: 'सिस्टम ने पहले ही जिन चीज़ों पर ध्यान दिया है।',
+          actionLabel: 'कार्रवाई',
+          approve: 'मंज़ूर',
+          hold: 'रोकें',
+          approved: 'मंज़ूर किया',
+          onHold: 'रुका हुआ',
+          selectedHint: 'J और K से चुने, A से मंज़ूर करें, और H से रोकें।',
+          due: 'समय',
+          risk: 'जोखिम',
+          detail: 'विवरण',
+          noAction: 'इस समय कोई ज़रूरी काम नहीं है।',
+          note: 'सुबह की शुरुआत के लिए अच्छा जगह।'
+        }
+      };
+
+      const items = [
+        {
+          id: 'R-104',
+          title: { en: 'Release readiness check', hi: 'रिलीज तैयारता जांच' },
+          context: { en: 'The 11 a.m. launch is waiting on one last review.', hi: '11 बजे की लॉन्च एक आख़िरी समीक्षा पर अटकी है।' },
+          due: { en: '09:30', hi: '09:30' },
+          risk: { en: 'High', hi: 'उच्च' },
+          status: 'pending'
+        },
+        {
+          id: 'S-221',
+          title: { en: 'Invoice sign-off', hi: 'चालान स्वीकृति' },
+          context: { en: 'One invoice is missing, and it needs a quick sign-off.', hi: 'एक चालान गायब है और इसे जल्दी हाँकने की ज़रूरत है।' },
+          due: { en: '10:00', hi: '10:00' },
+          risk: { en: 'Medium', hi: 'मध्यम' },
+          status: 'pending'
+        },
+        {
+          id: 'T-317',
+          title: { en: 'Driver coverage gap', hi: 'ड्राइवर कवरेज में कमी' },
+          context: { en: 'Four urgent routes still need a driver assignment.', hi: 'चार ज़रूरी रास्तों पर अभी भी किसी ड्राइवर की नियुक्ति चाहिए।' },
+          due: { en: '09:45', hi: '09:45' },
+          risk: { en: 'High', hi: 'उच्च' },
+          status: 'pending'
+        },
+        {
+          id: 'P-088',
+          title: { en: 'Customer follow-up', hi: 'ग्राहक फॉलो-अप' },
+          context: { en: 'The account team wants a reply today.', hi: 'अकाउंट टीम आज जवाब चाहती है।' },
+          due: { en: '10:15', hi: '10:15' },
+          risk: { en: 'Medium', hi: 'मध्यम' },
+          status: 'pending'
+        },
+        {
+          id: 'W-056',
+          title: { en: 'Shift cover request', hi: 'शिफ्ट कवर अनुरोध' },
+          context: { en: 'Two morning shifts still need backup.', hi: 'दो सुबह वाली शिफ्टों के लिए अभी भी बैकअप चाहिए।' },
+          due: { en: '09:20', hi: '09:20' },
+          risk: { en: 'High', hi: 'उच्च' },
+          status: 'pending'
+        }
+      ];
+
+      const anomalies = [
+        {
+          severity: { en: 'Critical', hi: 'गंभीर' },
+          system: { en: 'Inventory sync', hi: 'इन्वेंट्री सिंक' },
+          detail: { en: 'Two sites are behind by 14 minutes.', hi: 'दो साइट 14 मिनट पीछे हैं।' },
+          time: '08:46'
+        },
+        {
+          severity: { en: 'Watch', hi: 'ध्यान दें' },
+          system: { en: 'Payment relay', hi: 'भुगतान रिले' },
+          detail: { en: 'Payment retries are rising above normal.', hi: 'भुगतान की दोबारा कोशिशें सामान्य से ज़्यादा बढ़ रही हैं।' },
+          time: '08:52'
+        },
+        {
+          severity: { en: 'Info', hi: 'जानकारी' },
+          system: { en: 'Vehicle tracking', hi: 'वाहन ट्रैकिंग' },
+          detail: { en: 'One route is back to normal after a short issue.', hi: 'एक रास्ता छोटे मुद्दे के बाद फिर से सामान्य हो गया है।' },
+          time: '08:58'
+        }
+      ];
+
+      const state = { locale: 'en', selected: 0, lowBandwidth: false };
+
+      function applyBandwidthMode() {
+        document.body.classList.toggle('low-bandwidth', state.lowBandwidth);
+        const bandwidthButton = document.getElementById('bandwidthToggle');
+        if (bandwidthButton) {
+          bandwidthButton.textContent = state.lowBandwidth ? 'Low bandwidth: on' : 'Low bandwidth: off';
+        }
+      }
+
+      // Keep the UI language and the visible content in sync whenever the toggle changes.
+      function setLocale(locale) {
+        state.locale = locale;
+        render();
+      }
+
+      function render() {
+        const t = translations[state.locale];
+        document.documentElement.lang = state.locale;
+        document.getElementById('eyebrow').textContent = t.eyebrow;
+        document.getElementById('title').textContent = t.title;
+        document.getElementById('subtitle').textContent = t.subtitle;
+        document.getElementById('liveLabel').textContent = t.live;
+        document.getElementById('priorityTitle').textContent = t.priorityTitle;
+        document.getElementById('prioritySubtitle').textContent = t.prioritySubtitle;
+        document.getElementById('pendingLabel').textContent = t.pending;
+        document.getElementById('metricTitle').textContent = t.metricTitle;
+        document.getElementById('metricSubtitle').textContent = t.metricSubtitle;
+        document.getElementById('timeMetricLabel').textContent = t.metricValueLabel;
+        document.getElementById('metricContext').textContent = t.metricContext;
+        document.getElementById('anomalyTitle').textContent = t.anomalyTitle;
+        document.getElementById('anomalySubtitle').textContent = t.anomalySubtitle;
+        document.getElementById('langToggle').textContent = state.locale === 'en' ? 'EN / HI' : 'EN / HI';
+        applyBandwidthMode();
+
+        renderActions();
+        renderAnomalies();
+      }
+
+      function renderActions() {
+        const t = translations[state.locale];
+        // Count open items so the header badge always reflects the current state.
+        const pendingCount = items.filter((item) => item.status === 'pending').length;
+        document.getElementById('pendingCount').textContent = pendingCount;
+        const actionsList = document.getElementById('actionsList');
+        if (pendingCount === 0) {
+          actionsList.innerHTML = `<div class="rounded-2xl border border-slate-800 bg-slate-800/50 p-4 text-sm text-slate-400">${t.noAction}</div>`;
+          return;
+        }
+
+        actionsList.innerHTML = items.map((item, index) => {
+          const isSelected = index === state.selected;
+          const isApproved = item.status === 'approved';
+          const isHeld = item.status === 'held';
+          const statusText = isApproved ? t.approved : isHeld ? t.onHold : t.pending;
+          const statusClass = isApproved ? 'text-emerald-300 border-emerald-500/20 bg-emerald-500/10' : isHeld ? 'text-amber-300 border-amber-500/20 bg-amber-500/10' : 'text-slate-300 border-slate-700/70 bg-slate-800/70';
+          return `
+            <article class="rounded-2xl border ${isSelected ? 'border-brand-500/50 bg-brand-500/10' : 'border-slate-800 bg-slate-800/60'} p-4">
+              <div class="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="rounded-full bg-slate-700 px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.25em] text-slate-300">${item.id}</span>
+                    <span class="rounded-full border px-2 py-1 text-[11px] font-semibold ${statusClass}">${statusText}</span>
+                  </div>
+                  <h3 class="mt-3 text-lg font-semibold text-white">${item.title[state.locale]}</h3>
+                  <p class="mt-2 text-sm text-slate-400">${item.context[state.locale]}</p>
+                </div>
+                <div class="text-right text-sm text-slate-400">
+                  <p><span class="font-medium text-slate-300">${t.due}:</span> ${item.due[state.locale]}</p>
+                  <p><span class="font-medium text-slate-300">${t.risk}:</span> ${item.risk[state.locale]}</p>
+                </div>
+              </div>
+              <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
+                <p class="text-xs text-slate-500">${isSelected ? t.selectedHint : t.note}</p>
+                <div class="flex gap-2">
+                  <button data-action="approve" data-index="${index}" class="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-sm font-semibold text-emerald-300 transition hover:bg-emerald-500/20">${t.approve}</button>
+                  <button data-action="hold" data-index="${index}" class="rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm font-semibold text-amber-300 transition hover:bg-amber-500/20">${t.hold}</button>
+                </div>
+              </div>
+            </article>
+          `;
+        }).join('');
+
+        actionsList.querySelectorAll('button').forEach((button) => {
+          button.addEventListener('click', () => {
+            const index = Number(button.getAttribute('data-index'));
+            const action = button.getAttribute('data-action');
+            applyAction(index, action);
+          });
+        });
+      }
+
+      function renderAnomalies() {
+        const t = translations[state.locale];
+        const count = anomalies.length;
+        document.getElementById('anomalyCount').textContent = count;
+        const anomaliesList = document.getElementById('anomaliesList');
+        anomaliesList.innerHTML = anomalies.map((item) => `
+          <div class="rounded-2xl border border-slate-800 bg-slate-800/60 p-4">
+            <div class="flex items-center justify-between gap-3">
+              <span class="rounded-full border border-amber-500/20 bg-amber-500/10 px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.25em] text-amber-300">${item.severity[state.locale]}</span>
+              <span class="text-sm text-slate-400">${item.time}</span>
+            </div>
+            <p class="mt-3 text-sm font-semibold text-white">${item.system[state.locale]}</p>
+            <p class="mt-1 text-sm text-slate-400">${item.detail[state.locale]}</p>
+          </div>
+        `).join('');
+      }
+
+      function applyAction(index, action) {
+        items[index].status = action === 'approve' ? 'approved' : 'held';
+        renderActions();
+      }
+
+      document.getElementById('langToggle').addEventListener('click', () => {
+        setLocale(state.locale === 'en' ? 'hi' : 'en');
+      });
+
+      document.getElementById('bandwidthToggle').addEventListener('click', () => {
+        state.lowBandwidth = !state.lowBandwidth;
+        applyBandwidthMode();
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'j' || event.key === 'J') {
+          event.preventDefault();
+          state.selected = Math.min(items.length - 1, state.selected + 1);
+          renderActions();
+        }
+        if (event.key === 'k' || event.key === 'K') {
+          event.preventDefault();
+          state.selected = Math.max(0, state.selected - 1);
+          renderActions();
+        }
+        if (event.key === 'a' || event.key === 'A') {
+          event.preventDefault();
+          applyAction(state.selected, 'approve');
+        }
+        if (event.key === 'h' || event.key === 'H') {
+          event.preventDefault();
+          applyAction(state.selected, 'hold');
+        }
+      });
+
+      function updateClock() {
+        const now = new Date();
+        const clock = document.getElementById('clock');
+        clock.textContent = now.toLocaleTimeString(state.locale === 'hi' ? 'en-IN' : 'en-US', {
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        });
+      }
+
+      function updateMetric() {
+        const t = translations[state.locale];
+        // The countdown is a simple visual timer for the day’s review window.
+        const now = new Date();
+        const endOfDay = new Date(now);
+        endOfDay.setHours(17, 0, 0, 0);
+
+        if (now > endOfDay) {
+          endOfDay.setDate(endOfDay.getDate() + 1);
+        }
+
+        const diff = endOfDay - now;
+        const hours = String(Math.floor(diff / 3600000)).padStart(2, '0');
+        const minutes = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
+        const seconds = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
+        document.getElementById('metricValue').textContent = `${hours}:${minutes}:${seconds}`;
+        document.getElementById('metricContext').textContent = t.metricContext;
+      }
+
+      updateClock();
+      updateMetric();
+      setInterval(updateClock, 1000);
+      setInterval(updateMetric, 1000);
+      render();
+    </script>
+  </body>
+</html>
